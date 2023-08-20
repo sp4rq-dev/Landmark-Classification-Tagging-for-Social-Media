@@ -5,7 +5,7 @@ from pathlib import Path
 from torchvision import datasets, transforms
 import multiprocessing
 
-from .helpers import compute_mean_and_std, get_data_location
+from src.helpers import compute_mean_and_std, get_data_location
 import matplotlib.pyplot as plt
 
 

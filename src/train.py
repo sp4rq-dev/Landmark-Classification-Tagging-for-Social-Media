@@ -211,7 +211,7 @@ import pytest
 
 @pytest.fixture(scope="session")
 def data_loaders():
-    from .data import get_data_loaders
+    from data import get_data_loaders
 
     return get_data_loaders(batch_size=50, limit=200, valid_size=0.5, num_workers=0)
 

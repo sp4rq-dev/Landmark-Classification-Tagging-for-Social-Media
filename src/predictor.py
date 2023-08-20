@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from torchvision import datasets
 import torchvision.transforms as T
-from .helpers import get_data_location
+from src.helpers import get_data_location
 
 
 class Predictor(nn.Module):
