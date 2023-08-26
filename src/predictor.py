@@ -75,15 +75,15 @@ import pytest
 
 @pytest.fixture(scope="session")
 def data_loaders():
-    from .data import get_data_loaders
+    from data import get_data_loaders
 
     return get_data_loaders(batch_size=2)
 
 
 def test_model_construction(data_loaders):
 
-    from .model import MyModel
-    from .helpers import compute_mean_and_std
+    from model import MyModel
+    from helpers import compute_mean_and_std
 
     mean, std = compute_mean_and_std()
 
