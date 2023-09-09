@@ -14,21 +14,39 @@ class MyModel(nn.Module):
         # the Dropout layer, use the variable "dropout" to indicate how much
         # to use (like nn.Dropout(p=dropout))
         self.features = nn.Sequential(
-            nn.Conv2d(3, 16, 3, padding=1),
+            nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1),
+            nn.BatchNorm2d(16),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
-            nn.Conv2d(16, 32, 3, padding=1),
+
+            nn.Conv2d(16, 32, 3, padding=1),  # -> 32x16x16
+            nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
+            nn.MaxPool2d(2, 2),  # -> 32x8x8
+
+            nn.Conv2d(32, 64, 3, padding=1),  # -> 64x8x8
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),  # -> 64x4x4
+
+            nn.Conv2d(64, 128, 3, padding=1),  # -> 128x4x4
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),  # -> 128x2x2
+
+            nn.Conv2d(128, 256, 3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(256),
+            nn.MaxPool2d(2, 2)
+            # nn.Flatten(),  # -> 1x64x4x4
+
         )
         self.classifier = nn.Sequential(
-            nn.Dropout(p=dropout),
-            nn.Linear(32 * 56 * 56, 1024),
+            nn.Linear(256 * 7 * 7, 1024),  # -> 1024
+            nn.Dropout(dropout),
+            nn.BatchNorm1d(1024),
             nn.ReLU(),
-            nn.Dropout(p=dropout),
-            nn.Linear(1024, 512),
-            nn.ReLU(),
-            nn.Linear(512, num_classes),
+            nn.Linear(1024, num_classes),
         )
 
 
@@ -61,7 +79,7 @@ def test_model_construction(data_loaders):
     model = MyModel(num_classes=23, dropout=0.3)
 
     dataiter = iter(data_loaders["train"])
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     out = model(images)
 

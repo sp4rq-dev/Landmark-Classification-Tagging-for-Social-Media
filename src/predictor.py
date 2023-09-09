@@ -90,7 +90,7 @@ def test_model_construction(data_loaders):
     model = MyModel(num_classes=3, dropout=0.3)
 
     dataiter = iter(data_loaders["train"])
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     predictor = Predictor(model, class_names=['a', 'b', 'c'], mean=mean, std=std)
 

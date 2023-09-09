@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 def get_data_loaders(
-    batch_size: int = 32, valid_size: float = 0.2, num_workers: int = -1, limit: int = -1
+        batch_size: int = 32, valid_size: float = 0.2, num_workers: int = -1, limit: int = -1
 ):
     """
     Create and returns the train_one_epoch, validation and test data loaders.
@@ -48,14 +48,25 @@ def get_data_loaders(
     data_transforms = {
         "train": transforms.Compose(
             [
-             transforms.RandomResizedCrop(224),
-             transforms.RandomHorizontalFlip(),
-             transforms.ToTensor(),
-             transforms.Normalize(mean=mean, std=std)
-             ]
+                transforms.Resize(256),
+                transforms.RandomCrop(224, padding_mode="reflect", pad_if_needed=True),
+                # transforms.RandomAffine(scale=(0.9, 1.1), translate=(0.1, 0.1), degrees=10),
+                transforms.RandomAffine(degrees=(-5, 5), translate=(0, 0.1), scale=(1.0, 1.25), shear=(-10, 10)),
+                transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+                transforms.RandomHorizontalFlip(0.5),
+                transforms.RandAugment(
+                    num_ops=3,
+                    magnitude=15,
+                    interpolation=transforms.InterpolationMode.BILINEAR
+                ),
+
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std)
+            ]
         ),
         "valid": transforms.Compose(
             [
+                transforms.Resize(256),
                 transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std)
@@ -63,6 +74,7 @@ def get_data_loaders(
         ),
         "test": transforms.Compose(
             [
+                transforms.Resize(256),
                 transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std)
@@ -100,7 +112,7 @@ def get_data_loaders(
 
     # define samplers for obtaining training and validation batches
     train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
-    valid_sampler  = torch.utils.data.SubsetRandomSampler(valid_idx)
+    valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
 
     # prepare data loaders
     data_loaders["train"] = torch.utils.data.DataLoader(
@@ -156,7 +168,7 @@ def visualize_one_batch(data_loaders, max_n: int = 5):
     dataiter = iter(data_loaders["train"])
     # Then call the .next() method on the iterator you just
     # obtained
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     # Undo the normalization (for visualization purposes)
     mean, std = compute_mean_and_std()
@@ -199,14 +211,14 @@ def data_loaders():
 
 
 def test_data_loaders_keys(data_loaders):
-
-    assert set(data_loaders.keys()) == {"train", "valid", "test"}, "The keys of the data_loaders dictionary should be train, valid and test"
+    assert set(data_loaders.keys()) == {"train", "valid",
+                                        "test"}, "The keys of the data_loaders dictionary should be train, valid and test"
 
 
 def test_data_loaders_output_type(data_loaders):
     # Test the data loaders
     dataiter = iter(data_loaders["train"])
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     assert isinstance(images, torch.Tensor), "images should be a Tensor"
     assert isinstance(labels, torch.Tensor), "labels should be a Tensor"
@@ -216,14 +228,13 @@ def test_data_loaders_output_type(data_loaders):
 
 def test_data_loaders_output_shape(data_loaders):
     dataiter = iter(data_loaders["train"])
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     assert len(images) == 2, f"Expected a batch of size 2, got size {len(images)}"
     assert (
-        len(labels) == 2
+            len(labels) == 2
     ), f"Expected a labels tensor of size 2, got size {len(labels)}"
 
 
 def test_visualize_one_batch(data_loaders):
-
     visualize_one_batch(data_loaders, max_n=2)
